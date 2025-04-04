@@ -1,0 +1,32 @@
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+
+TOKEN = "7269497277:AAH2NoljNqYHiDIARQbR06hsq4Mgj0Ufkmc"
+messages = {}
+
+def start(update, context):
+    update.message.reply_text("🤖 به ربات نجوا خوش آمدید! یک پیام بفرستید.")
+
+def save_message(update, context):
+    user_id = update.message.from_user.id
+    messages[user_id] = update.message.text
+    update.message.reply_text("✅ پیام ذخیره شد! آیدی کاربر را بفرستید.")
+
+def send_message(update, context):
+    try:
+        target_id = int(update.message.text)
+        if target_id in messages:
+            context.bot.send_message(target_id, f"🔐 یک پیام محرمانه:\n{messages[target_id]}")
+            update.message.reply_text("✅ پیام ارسال شد!")
+        else:
+            update.message.reply_text("⚠️ کاربر پیامی ندارد!")
+    except:
+        update.message.reply_text("❌ آیدی باید عدد باشد!")
+
+updater = Updater(TOKEN)
+updater.dispatcher.add_handler(CommandHandler('start', start))
+updater.dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, save_message))
+updater.dispatcher.add_handler(MessageHandler(Filters.regex(r'^\d+$'), send_message))
+
+print("ربات فعال شد! 🤖")
+updater.start_polling()
+updater.idle()
